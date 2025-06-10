@@ -5,6 +5,7 @@ import (
 	"gator/internal/config"
 	"gator/internal/database"
 	"gator/internal/handlers"
+	"gator/internal/middlewares"
 	"gator/internal/state"
 	"log"
 	"os"
@@ -13,14 +14,20 @@ import (
 )
 
 func main() {
-	s := state.State{Cfg: config.Read()}
+	cfg, err := config.Read()
+	if err != nil {
+		log.Fatalf("Error reading config: %v", err)
+	}
+
+	s := state.State{Cfg: cfg}
 
 	db, err := sql.Open("postgres", s.Cfg.DbUrl)
 	if err != nil {
 		log.Fatalf("Error connecting to database: %v", err)
 	}
 
-	s.Db = database.New(db)
+	s.Db = db
+	s.Queries = database.New(db)
 
 	cmds := handlers.Commands{
 		Cmds: make(map[string]func(*state.State, handlers.Command) error),
@@ -31,13 +38,17 @@ func main() {
 	cmds.Register("reset", handlers.Reset)
 	cmds.Register("users", handlers.Users)
 	cmds.Register("agg", handlers.Agg)
-	cmds.Register("addfeed", handlers.AddFeed)
+	cmds.Register("addfeed", middlewares.LoggedIn(handlers.AddFeed))
 	cmds.Register("feeds", handlers.Feeds)
+	cmds.Register("follow", handlers.Follow)
+	cmds.Register("following", handlers.Following)
+	cmds.Register("unfollow", middlewares.LoggedIn(handlers.Unfollow))
+	cmds.Register("browse", middlewares.LoggedIn(handlers.Browse))
 
 	args := os.Args
 
 	if len(args) < 2 {
-		log.Fatalf("Usage gator <command name> <args?>")
+		log.Fatalf("Usage: gator <command name> [args]")
 	}
 
 	cmd := handlers.Command{Name: args[1], Args: args[2:]}

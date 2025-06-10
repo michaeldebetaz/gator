@@ -7,6 +7,7 @@ import (
 	"html"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 type RSSFeed struct {
@@ -25,10 +26,10 @@ type RSSItem struct {
 	PubDate     string `xml:"pubDate"`
 }
 
-func FetchFeed(ctx context.Context, url string) (*RSSFeed, error) {
+func FetchFeed(ctx context.Context, u string) (*RSSFeed, error) {
 	feed := &RSSFeed{}
 
-	request, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	request, err := http.NewRequestWithContext(ctx, "GET", u, nil)
 	if err != nil {
 		return feed, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -56,6 +57,11 @@ func FetchFeed(ctx context.Context, url string) (*RSSFeed, error) {
 
 	feed.Channel.Title = html.UnescapeString(feed.Channel.Title)
 	feed.Channel.Description = html.UnescapeString(feed.Channel.Description)
+	link, err := url.Parse(feed.Channel.Link)
+	if err != nil {
+		return feed, fmt.Errorf("failed to parse channel link: %w", err)
+	}
+	feed.Channel.Link = link.String()
 
 	return feed, nil
 }
