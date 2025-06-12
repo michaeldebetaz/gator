@@ -51,9 +51,8 @@ func ScrapeFeeds(s *state.State) error {
 			if strings.Contains(err.Error(), "duplicate key") {
 				fmt.Printf("skipping post with title '%s': url already exists\n", item.Title)
 				continue
-			} else {
-				return fmt.Errorf("failed to create post: %w", err)
 			}
+			return fmt.Errorf("failed to create post: %w", err)
 		}
 	}
 

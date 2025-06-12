@@ -83,10 +83,10 @@ func Agg(s *state.State, cmd Command) error {
 		return fmt.Errorf("usage: gator agg <time between reqs>")
 	}
 
-	duration := cmd.Args[0]
-	timeBetweenReqs, err := time.ParseDuration(duration)
+	timeBetweenReqsStr := cmd.Args[0]
+	timeBetweenReqs, err := time.ParseDuration(timeBetweenReqsStr)
 	if err != nil {
-		return fmt.Errorf("failed to parse time duration '%s': %w", duration, err)
+		return fmt.Errorf("failed to parse time duration '%s': %w", timeBetweenReqsStr, err)
 	}
 
 	fmt.Printf("Collecting feeds every %s\n", timeBetweenReqs)
