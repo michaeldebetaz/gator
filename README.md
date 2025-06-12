@@ -14,7 +14,9 @@ go install github.com/michaeldebetaz/gator
 
 ## Configuration
 
-You'll need to create a `.gatorconfig.json` for the program to connect to your configured Postgres database. On Linux, you can easly initiate a postgres database by using the default services:
+You'll need to create a `.gatorconfig.json` for the program to connect to your configured Postgres database. On Linux, you can easly initiate a postgres database by using the default services.
+
+First install all the necessary packages:
 
 ```sh
 sudo apt update
@@ -22,13 +24,25 @@ sudo apt install postgresql postgresql-contrib
 psql --version
 ```
 
+Start the postgres service:
+
 ```sh
 sudo passwd postgres
 sudo service postgresql start
 ```
 
+Run `psql`:
+
 ```sh
 sudo -u postgres psql
+```
+
+Create the gator database and update the `postgres` user password:
+
+```sh
+postgres=# CREATE DATABASE gator;
+postgres=# \c gator;
+postgres=# ALTER USER postgres PASSWORD 'postgres';
 ```
 
 The `.gatorconfig.json` file should be located in your `$HOME` (`~`) directory.
